@@ -1,0 +1,5 @@
+,total_claim_amount,total_claim_amount,total_claim_amount,injury_claim,injury_claim,injury_claim,property_claim,property_claim,property_claim,vehicle_claim,vehicle_claim,vehicle_claim,months_as_customer,months_as_customer,months_as_customer,age,age,age
+,mean,median,std,mean,median,std,mean,median,std,mean,median,std,mean,median,std,mean,median,std
+fraud_reported,,,,,,,,,,,,,,,,,,
+N,50288.61,56520.0,27575.19,7179.23,6620.0,4961.2,7018.88,6560.0,4828.92,36090.49,41220.0,19698.05,202.6,200.0,113.57,38.88,38.0,8.97
+Y,60302.11,61290.0,20746.28,8208.34,7240.0,4550.31,8560.12,7440.0,4631.74,43533.64,44800.0,14849.39,208.08,199.0,119.82,39.14,38.0,9.65
