@@ -1,3 +1,0 @@
-Project Overview
-This internship task analyzes insurance fraud patterns using EDA, statistical comparison, time analysis, and geography-based patterns.
-Generated outputs include class imbalance, fraud heatmaps, time-based trend charts, amount distributions, correlation analysis, and written hypothesis.

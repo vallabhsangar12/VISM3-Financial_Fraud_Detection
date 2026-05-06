@@ -1,8 +1,0 @@
-Fraud Patterns Summary
-----------------------------------------
-- Total records analyzed: 1000
-- Overall fraud prevalence: 24.70%
-- Highest state fraud rate: OH (43.48%)
-- Highest city fraud rate: Arlington (28.95%)
-- Highest category-like fraud rate by incident type: Single Vehicle Collision (29.03%)
-- Peak fraud hour (rate): 11.0

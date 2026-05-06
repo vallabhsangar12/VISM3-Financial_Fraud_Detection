@@ -1,7 +1,0 @@
-Initial Fraud Hypothesis
-----------------------------------------
-1. The dataset is imbalanced, with non-fraud claims dominating the sample.
-2. Geography appears relevant: OH has the highest state-level fraud rate (43.48%).
-3. City-level concentration exists, with Arlington showing elevated fraud activity (28.95%).
-4. Incident category patterns indicate Single Vehicle Collision has the highest category-like fraud rate (29.03%).
-5. Claim amount features and incident severity should be prioritized for downstream fraud modeling.
