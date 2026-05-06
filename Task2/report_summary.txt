@@ -1,0 +1,175 @@
+================================================================================
+         FINANCIAL FRAUD DETECTION — MONTH 3, TASK 2
+         Vinayak IT Solutions | Data Science Internship
+         Submitted by: Vallabh | April 2026
+================================================================================
+
+PROJECT OVERVIEW
+----------------
+This report summarises the work completed in Task 2 of the Financial Fraud
+Detection project. Building on the EDA and fraud hypotheses established in
+Task 1, the objective here was to implement and compare multiple anomaly
+detection algorithms, engineer fraud-specific features, address the extreme
+class imbalance (578:1), and evaluate supervised models using various
+resampling strategies.
+
+DATASET DETAILS
+---------------
+  Source         : Credit Card Fraud Detection (same dataset as Task 1)
+  Total Records  : 284,807 transactions
+  Features       : 31 original + 12 engineered = 43 total features
+  Fraud Cases    : 492  (0.1728% of total)
+  Legit Cases    : 284,315 (99.8272% of total)
+  Imbalance Ratio: ~578:1 (legitimate to fraudulent)
+  Train Split    : 70% | Test Split: 30% (stratified)
+
+TOOLS & LIBRARIES USED
+-----------------------
+  Python 3.12 | Jupyter Notebook
+  pandas, numpy               — data manipulation and feature engineering
+  matplotlib, seaborn         — dark-theme visualisations
+  scipy                       — statistical testing and Z-score computation
+  scikit-learn                — anomaly detection, supervised classifiers,
+                                metrics (AUC-ROC, PR-AUC, F1, confusion matrix)
+  imbalanced-learn            — SMOTE, ADASYN, RandomUnderSampler,
+                                SMOTETomek, BalancedRandomForestClassifier
+
+FEATURE ENGINEERING
+-------------------
+12 new features were engineered across three categories:
+
+  1. Time-Based Features
+     - Hour            : Hour of day extracted from raw 'Time' field
+     - IsNight         : Binary flag for 00:00–05:59 (high-risk window)
+     - IsMorning/IsAfternoon/IsEvening : Categorical time-of-day segments
+     - Hour_sin, Hour_cos : Cyclic encoding to capture circular time structure
+
+  2. Amount-Based Features
+     - Log_Amount      : Log-transformed amount (reduces skew)
+     - Amount_Zscore   : Global z-score of transaction amount
+     - Amount_IsOutlier: Binary flag for amounts > 3 standard deviations
+     - Amount_Bin      : Categorical bucket (micro to high-value)
+
+  3. Velocity & Interaction Features
+     - Amt_RollMean    : Rolling 50-transaction mean of amount
+     - Amt_Deviation   : Amount deviation from rolling baseline
+     - Time_Diff       : Time gap to previous transaction
+     - Rapid_Txn       : Binary flag for transactions < 5 seconds apart
+     - V12_V14, V4_V12 : Interaction terms of top discriminating PCA features
+     - V_sum_top5      : Sum of top 5 fraud-discriminating features
+
+ANOMALY DETECTION METHODS IMPLEMENTED
+--------------------------------------
+Seven algorithms were benchmarked:
+
+  1. Z-Score (Statistical)        — Multivariate mean-z thresholding
+  2. Isolation Forest             — Random partitioning; best unsupervised result
+  3. One-Class SVM (RBF kernel)   — Boundary learning on normal-only data
+  4. Local Outlier Factor (LOF)   — Density-based local anomaly scoring
+  5. Gaussian Mixture Model (GMM) — Probabilistic density estimation
+  6. K-Means Clustering           — Distance-to-centroid anomaly scoring
+  7. Autoencoder (MLP-based)      — Reconstruction error as anomaly score
+
+  Best Unsupervised Method: Isolation Forest
+    - Consistently highest F1 and strong AUC-ROC
+    - No labelled fraud data required during training
+    - Efficient on large datasets via random subsampling
+
+  Strong AUC-ROC: Autoencoder
+    - Reconstruction error provides a smooth, well-calibrated anomaly score
+    - Threshold tuning on precision-recall curve recommended
+
+CLASS IMBALANCE HANDLING
+-------------------------
+Four resampling strategies were compared side-by-side:
+
+  Strategy           Result (representative)
+  -------------------------------------------------
+  Original (weighted) Moderate recall with class_weight='balanced'
+  SMOTE               Best overall precision-recall tradeoff
+  ADASYN              Slightly more variance than SMOTE, similar F1
+  Random Undersampling Lower performance — loses majority class information
+  SMOTE + Tomek Links Best boundary cleaning; competitive with SMOTE alone
+
+  Winner: SMOTE + Random Forest
+    - Highest combined F1 and recall among supervised approaches
+    - Cost-sensitive learning (class_weight='balanced') is a strong
+      lightweight alternative without any data-level resampling
+
+KEY FINDINGS
+------------
+1. FEATURE IMPORTANCE
+   - V14, V12, V4, V17 remain the top discriminating features (consistent
+     with Task 1 EDA findings).
+   - Engineered features V12_V14 interaction, Amt_Deviation (velocity),
+     and IsNight contributed meaningfully — confirming Task 1 hypotheses.
+
+2. UNSUPERVISED VS SUPERVISED
+   - Unsupervised methods (Isolation Forest) are suitable for real-time
+     scoring without needing labelled fraud samples.
+   - Supervised methods (SMOTE + RF) achieve better precision when labels
+     are available for periodic batch retraining.
+
+3. CLASS IMBALANCE IMPACT
+   - Models trained on raw imbalanced data achieve high accuracy but near-
+     zero recall on fraud — confirming that accuracy is a misleading metric.
+   - Precision-Recall AUC is the correct evaluation benchmark for this task.
+
+4. THRESHOLD SENSITIVITY
+   - The optimal decision threshold varies significantly by use case.
+   - A 95% recall target (catching most fraud) requires accepting ~10x more
+     false positives — an acceptable trade-off in card fraud contexts.
+
+RECOMMENDATIONS FOR TASK 3
+---------------------------
+  1. Use Isolation Forest as the primary real-time unsupervised scorer.
+  2. Use SMOTE + Random Forest / Gradient Boosting for supervised batch runs.
+  3. Engineer per-card velocity features when transaction history is available.
+  4. Tune decision thresholds via precision-recall curves (target: 95% recall).
+  5. Monitor model drift — fraud patterns evolve; periodic retraining is essential.
+
+SCREENSHOTS GENERATED
+---------------------
+  01_feature_importance.png   — Top 20 features by Random Forest Gini importance
+  02_algorithm_comparison.png — Precision/Recall/F1 and AUC-ROC bar charts
+  03_roc_curves.png           — Overlaid ROC curves for all 7 anomaly detectors
+  04_class_balancing.png      — Class distributions before & after each resampling
+  05_model_imbalanced.png     — LR vs RF performance across all sampling strategies
+  06_confusion_matrices.png   — Isolation Forest vs SMOTE+RF confusion matrices
+
+FOLDER STRUCTURE
+----------------
+  Month3/
+  └── Task2/
+      ├── fraud_detection_task2.ipynb   ← Main Jupyter Notebook
+      ├── build_nb_part1.py             ← Setup, data loading, feature engineering
+      ├── build_nb_part2.py             ← Anomaly detection methods
+      ├── build_nb_part3.py             ← Imbalance handling, supervised models
+      ├── assemble_nb.py                ← Notebook assembly script
+      ├── _cells_part1.json             ← Serialised notebook cells (part 1)
+      ├── _cells_part2.json             ← Serialised notebook cells (part 2)
+      ├── _cells_part3.json             ← Serialised notebook cells (part 3)
+      ├── screenshots/
+      │   ├── 01_feature_importance.png
+      │   ├── 02_algorithm_comparison.png
+      │   ├── 03_roc_curves.png
+      │   ├── 04_class_balancing.png
+      │   ├── 05_model_imbalanced.png
+      │   └── 06_confusion_matrices.png
+      └── report_summary.txt            ← This file
+
+  Note: Dataset is shared from Task 1:
+      Month3/Task1/dataset/creditcard.csv
+
+CONCLUSION
+----------
+Task 2 has been successfully completed. Seven anomaly detection algorithms were
+implemented and benchmarked, four class-imbalance strategies were applied and
+compared, 12 fraud-specific features were engineered, and supervised models were
+evaluated with both cost-sensitive and resampling-based approaches. The findings
+confirm and extend the hypotheses formulated in Task 1, and concrete
+recommendations have been produced to guide the model optimisation work in Task 3.
+
+================================================================================
+  End of Report — Month 3 Task 2 | Vinayak IT Solutions Internship
+================================================================================

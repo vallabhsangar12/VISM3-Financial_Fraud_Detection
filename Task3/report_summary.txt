@@ -1,0 +1,108 @@
+================================================================================
+         FINANCIAL FRAUD DETECTION — MONTH 3, TASK 3
+         Vinayak IT Solutions | Data Science Internship
+         Submitted by: Vallabh | April 2026
+================================================================================
+
+PROJECT OVERVIEW
+----------------
+This report summarises the work completed in Task 3: Real-time Fraud Monitoring.
+The objective of this task was to develop a production-ready fraud detection
+pipeline that handles streaming data, implements multiple ensemble strategies,
+and manages real-time deployment concerns such as model versioning, A/B testing,
+cost-sensitive optimization, and business impact measurement.
+
+DATASET DETAILS
+---------------
+  Source         : Credit Card Fraud Detection (same dataset as Task 1/2)
+  Features       : 31 original + 12 engineered = 43 total features
+  Train Split    : 70% | Test Split: 30% (stratified)
+
+TOOLS & LIBRARIES USED
+-----------------------
+  Python 3.12 | Jupyter Notebook
+  pandas, numpy               — data manipulation and windowed aggregations
+  matplotlib, seaborn         — dark-theme visualisations
+  scikit-learn                — Isolation Forest, Random Forest, Gradient Boosting,
+                                Logistic Regression, Stacking, metrics
+  imbalanced-learn            — SMOTE
+
+1. STREAMING DATA PROCESSING
+----------------------------
+  - Real-time Feature Engine: Online computation of time and amount features
+    on incoming transactions (simulated at 250 TPS).
+  - Sliding Window Aggregations: Maintained per-card statistics (count, total,
+    max, mean) over rolling 30s, 1m, and 5m windows using deque buffers.
+  - Stateful Processor: Kept per-card historical fraud memory using exponential
+    moving averages, categorising cards into risk levels (LOW to CRITICAL)
+    for sequence-based attack detection.
+
+2. ENSEMBLE METHODS
+-------------------
+  Several ensemble techniques were implemented to maximize performance:
+  - Stacking: RF, GB, and LR base models fed into a Logistic Regression
+    meta-learner.
+  - Weighted Voting: AUC-weighted soft voting across multiple ML models and
+    Isolation Forest.
+  - Rule-based + ML Hybrid: Hard business rules (e.g., instant block for
+    high amounts at night, allow for micro-tx in business hours) as a
+    low-latency first pass, delegating ambiguous cases to ML.
+  - Adaptive Learning: ADWIN-style drift detection that triggers incremental
+    retraining when the F1 score drops below a baseline (simulating concept drift).
+
+3. MODEL DEPLOYMENT & REAL-TIME API
+-----------------------------------
+  - Prediction API: Low-latency REST API simulation enforcing a 20ms SLA,
+    processing sub-5ms P50 latency.
+  - Model Versioning: A registry tracking model performance snapshots, allowing
+    easy promotion to ACTIVE or rollback.
+  - A/B Testing Framework: 50/50 traffic splitting between models (e.g., RF-v2
+    vs GB-v3), collecting live metrics.
+  - Monitoring & Alerting: Rolling window observation of precision, recall, F1,
+    and FPR. Automated alerts fire on FPR spikes (>5%), recall drops (<70%),
+    and latency violations (>50ms P99).
+
+4. PERFORMANCE & BUSINESS OPTIMIZATION
+--------------------------------------
+  - Threshold Optimization: Swept decision thresholds to find the point that
+    maximizes recall while capping False Positive Rate (FPR) at 2%.
+  - Cost-sensitive Evaluation: Applied a real-world cost matrix:
+      * True Positive (Fraud blocked): -$250 (savings)
+      * False Positive (Legit blocked): +$15 (friction/investigation cost)
+      * False Negative (Missed fraud): +$180 (loss + chargeback fee)
+    Found the threshold that minimized the total expected business cost.
+  - Business Impact: Extrapolated test set results to monthly volumes,
+    showing a substantial net monthly saving by balancing caught fraud vs.
+    false alarm friction.
+  - Feedback Loop: Simulated analyst-driven label corrections over 20 cycles,
+    demonstrating progressive F1 and recall improvement.
+
+SCREENSHOTS GENERATED
+---------------------
+  01_streaming_pipeline.png        — Architecture, TPS, latency, risk distribution
+  02_ensemble_architecture.png     — Model registry, A/B test, rolling monitoring
+  03_performance_optimization.png  — Ensemble comparison, stacking CM, drift detection
+  04_business_impact.png           — Cost/threshold curves, monthly ROI, feedback loop
+
+FOLDER STRUCTURE
+----------------
+  Month3/
+  └── Task3/
+      ├── fraud_detection_task3.ipynb   ← Main Jupyter Notebook
+      ├── build_nb_part*.py             ← Generation scripts
+      ├── assemble_nb.py                ← Assembly script
+      ├── _cells_part*.json             ← Intermediate cells
+      ├── screenshots/                  ← 4 detailed dashboards
+      └── report_summary.txt            ← This file
+
+CONCLUSION
+----------
+Task 3 is fully complete. The system was successfully transformed from static
+ML models into a dynamic, production-ready, streaming fraud detection pipeline.
+We integrated ensemble learners, established rigorous real-time monitoring and
+versioning, and aligned the model output directly with financial business impact.
+The project is now ready for UI dashboard integration in Task 4.
+
+================================================================================
+  End of Report — Month 3 Task 3 | Vinayak IT Solutions Internship
+================================================================================

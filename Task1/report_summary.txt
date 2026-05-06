@@ -1,0 +1,135 @@
+================================================================================
+         FINANCIAL FRAUD DETECTION — MONTH 3, TASK 1
+         Vinayak IT Solutions | Data Science Internship
+         Submitted by: Vallabh | April 2026
+================================================================================
+
+PROJECT OVERVIEW
+----------------
+This report summarises the exploratory analysis conducted in Task 1 of the
+Financial Fraud Detection project. The primary objective was to deeply understand
+the structure of credit card transaction data, quantify the class imbalance
+problem, and identify early-stage fraud patterns before any machine learning
+model is built.
+
+DATASET DETAILS
+---------------
+  Source         : Credit Card Fraud Detection (Kaggle-style dataset)
+  Total Records  : 284,807 transactions
+  Features       : 31 (Time, V1–V28 PCA features, Amount, Class)
+  Fraud Cases    : 492  (0.1728% of total)
+  Legit Cases    : 284,315 (99.8272% of total)
+  Imbalance Ratio: ~578:1 (legitimate to fraudulent)
+  Missing Values : None
+
+TOOLS & LIBRARIES USED
+-----------------------
+  Python 3.12 | Jupyter Notebook
+  pandas, numpy — data loading and manipulation
+  matplotlib, seaborn — visualisations
+  scipy — statistical testing (Mann-Whitney U)
+  imbalanced-learn — (for Task 2 — SMOTE balancing)
+  scikit-learn — (for Task 2 — model building)
+
+KEY FINDINGS FROM EDA
+---------------------
+1. CLASS IMBALANCE
+   - Fraud accounts for only 0.17% of all transactions.
+   - This extreme imbalance makes naive accuracy a misleading metric.
+   - Precision-Recall AUC is the appropriate evaluation benchmark.
+
+2. TRANSACTION AMOUNT PATTERNS
+   - Legitimate transactions: median ~EUR 22; right-skewed up to EUR 25,691.
+   - Fraudulent transactions: bimodal — a cluster of micro-transactions
+     (< EUR 10, likely card-testing) and another cluster of high-value grabs.
+   - Mann-Whitney U test confirms the difference is statistically significant
+     (p-value < 0.05).
+
+3. TIME-BASED PATTERNS
+   - Fraud incidents show slightly higher density during early morning hours
+     (00:00–04:00), consistent with real-world fraud behaviour where
+     cardholders are less likely to notice unusual activity.
+   - Legitimate transactions peak during business hours (09:00–20:00).
+
+4. PCA FEATURE SEPARATION
+   - V12, V14, V4, V17, and V10 show the largest mean shift between fraud
+     and legitimate classes, making them the most informative features.
+   - These should receive high importance during model feature engineering.
+
+5. FRAUD PATTERN HEATMAP
+   - The hour × amount heatmap reveals that fraud in higher amount buckets
+     (EUR 250–1,000) tends to cluster in overnight hours.
+   - Small-amount fraud is spread more uniformly across hours, supporting
+     the card-testing hypothesis.
+
+FRAUD HYPOTHESES (Initial)
+---------------------------
+H1: High-value transactions (> EUR 250) carry disproportionately higher
+    fraud risk, especially when they occur outside normal business hours.
+
+H2: Night-time transactions (00:00–04:00) show concentrated fraud density;
+    a time-window feature would likely improve model performance.
+
+H3: V12, V14, and V17 are the strongest discriminating features and likely
+    encode merchant-category or geographic behavioural signals.
+
+H4: Low-value micro-transactions (< EUR 10) that immediately precede a
+    high-value transaction from the same "account signal" are a strong
+    indicator of card-testing fraud sequences.
+
+WHY ANOMALY DETECTION IS SUITABLE
+----------------------------------
+Given the 578:1 imbalance:
+
+  a) Isolation Forest — Uses random partitioning; anomalies (fraud) are
+     isolated in fewer splits. Requires no labelled fraud samples.
+
+  b) One-Class SVM — Learns a tight boundary around normal behaviour;
+     anything outside is flagged as anomalous.
+
+  c) SMOTE (imbalanced-learn) — Synthesises new minority-class samples to
+     balance the training set before supervised classification.
+
+  d) Autoencoders — Train only on legitimate data; high reconstruction
+     error on fraud transactions reveals anomalies.
+
+Full model training using the above techniques is planned for Task 2.
+
+SCREENSHOTS GENERATED
+---------------------
+  01_class_imbalance.png      — Bar + pie chart of fraud vs legitimate split
+  02_amount_distribution.png  — Histogram of transaction amounts by class
+  03_time_patterns.png        — Hour-of-day frequency for both classes
+  04_correlation_heatmap.png  — Feature correlation matrix vs fraud class
+  05_amount_boxplot.png       — Boxplot comparison of amounts by class
+  06_feature_separation.png   — PCA feature mean-difference ranking
+  07_fraud_heatmap.png        — Fraud density heatmap (hour × amount bucket)
+
+FOLDER STRUCTURE
+----------------
+  Month3/
+  └── Task1/
+      ├── fraud_detection_task1.ipynb   ← Main Jupyter Notebook
+      ├── dataset/
+      │   └── creditcard.csv            ← Dataset (284,807 rows, 31 cols)
+      ├── screenshots/
+      │   ├── 01_class_imbalance.png
+      │   ├── 02_amount_distribution.png
+      │   ├── 03_time_patterns.png
+      │   ├── 04_correlation_heatmap.png
+      │   ├── 05_amount_boxplot.png
+      │   ├── 06_feature_separation.png
+      │   └── 07_fraud_heatmap.png
+      └── report_summary.txt            ← This file
+
+CONCLUSION
+----------
+Task 1 has been successfully completed. The credit card fraud dataset has been
+thoroughly explored, class imbalance has been quantified and visualised, and
+meaningful fraud patterns have been identified through statistical and visual
+analysis. Four strong fraud hypotheses have been formulated to guide the model
+development in Task 2.
+
+================================================================================
+  End of Report — Month 3 Task 1 | Vinayak IT Solutions Internship
+================================================================================

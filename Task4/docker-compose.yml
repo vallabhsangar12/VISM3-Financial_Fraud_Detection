@@ -1,0 +1,92 @@
+version: "3.9"
+
+# ============================================================
+# FraudShield — Docker Compose
+# Services: dashboard (Streamlit) + api (FastAPI)
+# Optional: postgres (uncomment to enable persistent DB)
+# ============================================================
+
+services:
+
+  # ── Streamlit Dashboard ──────────────────────────────────
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fraudshield-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./dataset:/app/dataset:ro        # Mount dataset (read-only)
+      - ./reports:/app/reports           # Persist generated reports
+      - ./backend/model:/app/backend/model  # Persist trained model
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - fraudshield-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── FastAPI Backend ──────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: fraudshield-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=change-this-in-production-please
+    volumes:
+      - ./dataset:/app/dataset:ro
+      - ./reports:/app/reports
+      - ./backend/model:/app/backend/model
+    restart: unless-stopped
+    networks:
+      - fraudshield-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── PostgreSQL (Optional) ────────────────────────────────
+  # Uncomment the block below to enable persistent storage
+  #
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: fraudshield-postgres
+  #   environment:
+  #     POSTGRES_DB:       fraud_db
+  #     POSTGRES_USER:     fraud_user
+  #     POSTGRES_PASSWORD: fraud_password_change_me
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #     - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+  #   networks:
+  #     - fraudshield-net
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U fraud_user -d fraud_db"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+networks:
+  fraudshield-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

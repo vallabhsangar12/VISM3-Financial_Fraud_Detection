@@ -1,0 +1,63 @@
+# ── Large Data Files ──────────────────────────────────────────
+# The creditcard.csv is 144MB — download from Kaggle separately
+# https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+**/dataset/creditcard.csv
+**/dataset/*.csv
+**/dataset/sample_transactions.csv
+
+# ── ZIP Archives (do not commit task zips) ────────────────────
+*.zip
+
+# ── Trained ML Models (large binary files) ───────────────────
+**/backend/model/fraud_model.pkl
+**/backend/model/scaler.pkl
+**/*.pkl
+**/*.joblib
+
+# ── Python Cache ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.Python
+
+# ── Virtual Environments ──────────────────────────────────────
+venv/
+env/
+.env/
+.venv/
+ENV/
+
+# ── Environment Variables ─────────────────────────────────────
+.env
+.env.local
+.env.production
+*.env
+
+# ── Jupyter Checkpoints ───────────────────────────────────────
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# ── Streamlit ─────────────────────────────────────────────────
+.streamlit/secrets.toml
+
+# ── Log Files ────────────────────────────────────────────────
+**/reports/logs/*.log
+*.log
+
+# ── OS Files ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDEs ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Node (if any frontend) ───────────────────────────────────
+node_modules/
+.next/
+dist/
+build/
